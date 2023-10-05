@@ -13,7 +13,7 @@ class Solution:
        
         a_score = 0
         b_score = 0
-        for i in range(1, len(colors) - 1):
+        for i in range(1, len(colors) - 1): # remove edge
             curr_color = colors[i]
             prev_color = colors[i-1]
             next_color = colors[i+1]
