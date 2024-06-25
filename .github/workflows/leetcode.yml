@@ -1,0 +1,42 @@
+name: Update LeetCode Solutions
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight
+  workflow_dispatch: # Allows manual triggering of the workflow
+
+jobs:
+  update-solutions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install LeetCode CLI
+        run: npm install -g leetcode-cli
+
+      - name: Login to LeetCode
+        run: leetcode user -l -u ${{ secrets.LEETCODE_USERNAME }} -p ${{ secrets.LEETCODE_PASSWORD }}
+
+      - name: Fetch LeetCode Solutions
+        run: |
+          mkdir -p leetcode_solutions
+          cd leetcode_solutions
+          leetcode show 1 -gx -l cpp # Example: Fetch problem with ID 1
+          # Add more commands to fetch other problems as needed
+
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "Update LeetCode solutions"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
