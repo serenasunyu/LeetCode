@@ -16,7 +16,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'
+          node-version: '20' # Update to the latest LTS version
+
+      - name: Install npm-check-updates locally
+        run: npm install --save-dev npm-check-updates
+
+      - name: Update dependencies
+        run: |
+          npx npm-check-updates -u
+          npm install
 
       - name: Install LeetCode CLI
         run: npm install -g leetcode-cli
@@ -29,6 +37,11 @@ jobs:
         env:
           LEETCODE_USERNAME: ${{ secrets.LEETCODE_USERNAME }}
           LEETCODE_PASSWORD: ${{ secrets.LEETCODE_PASSWORD }}
+
+      - name: Debug Raw Output
+        run: |
+          raw_output=$(leetcode list -q -t -l -g -o json)
+          echo "Raw output: $raw_output"
 
       - name: Fetch Solved Problems for Today
         id: fetch-today-problems
