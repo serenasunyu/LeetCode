@@ -52,7 +52,7 @@ jobs:
           echo "::set-output name=solved_problems::$solved_problems"
         continue-on-error: true # Continue even if leetcode list command fails
 
-       - name: Retry Login if Session Expired
+      - name: Retry Login if Session Expired
         if: ${{ failure() && steps.login.outputs.exit-status == '1' }}
         run: |
           echo "Session expired. Retrying login..."
