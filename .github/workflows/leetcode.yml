@@ -33,10 +33,10 @@ jobs:
         run: leetcode version
 
       - name: Login to LeetCode
-        run: leetcode user -l -u ${{ secrets.LEETCODE_USERNAME }} -p ${{ secrets.LEETCODE_PASSWORD }}
-        env:
-          LEETCODE_USERNAME: ${{ secrets.LEETCODE_USERNAME }}
-          LEETCODE_PASSWORD: ${{ secrets.LEETCODE_PASSWORD }}
+        id: login
+        run: |
+          leetcode user -l -u ${{ secrets.LEETCODE_USERNAME }} -p ${{ secrets.LEETCODE_PASSWORD }}
+          echo "Login successful."
 
       - name: Debug Raw Output
         run: |
@@ -50,6 +50,14 @@ jobs:
           solved_problems=$(leetcode list -q -t -l -g -o json | jq -r --arg today "$today" '[.[] | select(.ac_date | startswith($today)) | .id]')
           echo "Solved problems: $solved_problems"
           echo "::set-output name=solved_problems::$solved_problems"
+        continue-on-error: true # Continue even if leetcode list command fails
+
+       - name: Retry Login if Session Expired
+        if: ${{ failure() && steps.login.outputs.exit-status == '1' }}
+        run: |
+          echo "Session expired. Retrying login..."
+          leetcode user -l -u ${{ secrets.LEETCODE_USERNAME }} -p ${{ secrets.LEETCODE_PASSWORD }}
+          echo "Login successful."
 
       - name: Fetch and Save Solutions
         run: |
