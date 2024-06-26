@@ -16,27 +16,45 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'
+          node-version: '16'
 
       - name: Install LeetCode CLI
         run: npm install -g leetcode-cli
 
+      - name: Check LeetCode CLI Installation
+        run: leetcode version
+
       - name: Login to LeetCode
         run: leetcode user -l -u ${{ secrets.LEETCODE_USERNAME }} -p ${{ secrets.LEETCODE_PASSWORD }}
+        env:
+          LEETCODE_USERNAME: ${{ secrets.LEETCODE_USERNAME }}
+          LEETCODE_PASSWORD: ${{ secrets.LEETCODE_PASSWORD }}
 
-      - name: Fetch LeetCode Solutions
+      - name: Fetch Solved Problems for Today
+        id: fetch-today-problems
+        run: |
+          today=$(date +'%Y-%m-%d')
+          solved_problems=$(leetcode list -q -t -l -g -o json | jq -r --arg today "$today" '[.[] | select(.ac_date | startswith($today)) | .id]')
+          echo "Solved problems: $solved_problems"
+          echo "::set-output name=solved_problems::$solved_problems"
+
+      - name: Fetch and Save Solutions
         run: |
           mkdir -p leetcode_solutions
           cd leetcode_solutions
-          leetcode show 1 -gx -l cpp # Example: Fetch problem with ID 1
-          # Add more commands to fetch other problems as needed
+          for problem_id in $(echo ${{ steps.fetch-today-problems.outputs.solved_problems }} | jq -r '.[]'); do
+            leetcode show $problem_id -gx -l cpp
+          done
+        env:
+          LEETCODE_USERNAME: ${{ secrets.LEETCODE_USERNAME }}
+          LEETCODE_PASSWORD: ${{ secrets.LEETCODE_PASSWORD }}
 
       - name: Commit and Push
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add .
-          git commit -m "Update LeetCode solutions"
+          git commit -m "Update LeetCode solutions for $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git push origin main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
