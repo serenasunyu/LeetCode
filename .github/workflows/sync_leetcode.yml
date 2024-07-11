@@ -1,29 +1,21 @@
-name: LeetCode Sync
+name: Sync Leetcode
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
-  sync:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    - name: LeetCode Sync
-      id: leetcode-sync
-      run: node index.js
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
-        LEETCODE_CSRF_TOKEN: ${{ secrets.LEETCODE_CSRF_TOKEN }}
-        LEETCODE_SESSION: ${{ secrets.LEETCODE_SESSION }}
-
-    - name: Debug Response
-      if: failure()
-      run: |
-        echo "Sync failed. Logging response for debugging."
-        echo "Response: ${{ steps.leetcode-sync.outputs.response }}"
+      - name: Sync
+        uses: joshcai/leetcode-sync@v1.7
+        with:
+          github-token: ${{ github.token }}
+          leetcode-csrf-token: ${{ secrets.LEETCODE_CSRF_TOKEN }}
+          leetcode-session: ${{ secrets.LEETCODE_SESSION }}
+          destination-folder: my-folder
+          verbose: true
+          commit-header: "[LeetCode Sync]"
