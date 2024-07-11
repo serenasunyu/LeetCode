@@ -10,7 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Sync
+        id: leetcode-sync
         uses: joshcai/leetcode-sync@v1.7
         with:
           github-token: ${{ github.token }}
@@ -19,3 +23,9 @@ jobs:
           destination-folder: my-folder
           verbose: true
           commit-header: "[LeetCode Sync]"
+
+      - name: Debug Response
+        if: failure()
+        run: |
+          echo "Sync failed. Logging response for debugging."
+          echo "Response: ${{ steps.leetcode-sync.outputs.response }}"
