@@ -15,7 +15,7 @@ jobs:
 
     - name: LeetCode Sync
       id: leetcode-sync
-      run: node action.js
+      run: node index.js
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_REPOSITORY: ${{ github.repository }}
