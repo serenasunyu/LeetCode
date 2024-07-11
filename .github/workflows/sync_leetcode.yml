@@ -15,7 +15,7 @@ jobs:
 
       - name: Sync
         id: leetcode-sync
-        uses: serenasunyu/leetcode-sync@master
+        uses: serenasunyu/leetcode-sync@main
         with:
           github-token: ${{ github.token }}
           leetcode-csrf-token: ${{ secrets.LEETCODE_CSRF_TOKEN }}
